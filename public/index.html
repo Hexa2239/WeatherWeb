@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Web</title>
+
+    <style>
+        body {
+            background-color: rgb(29, 72, 228);
+        }
+
+        h1, h2, h3 {
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+        }
+    </style>
+
+</head>
+
+
+<script>
+    function getWeather() {
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
+        // Get the value of "some_key" in eg "https://example.com/?some_key=some_value"
+        let value = params.a;
+
+        fetch("/api/weather?area=" + value)
+            .then(response => {
+                return response.text();
+            })
+            .then(text => {
+                const data = JSON.parse(text);
+
+                document.getElementById("area").innerText = data.location.name
+                document.getElementById("region").innerText = data.location.region + " - " + data.location.country
+                const weatherInfo = `
+                    <h2>Weather in ${data.location.name}, ${data.location.region}</h2>
+                    <p><strong>Current Temperature:</strong> ${data.current.temp_c} °C (${data.current.temp_f} °F)</p>
+                    <p><strong>Condition:</strong> ${data.current.condition.text} <img src="${data.current.condition.icon}" alt="${data.current.condition.text} icon"></p>
+                    <p><strong>Feels Like:</strong> ${data.current.feelslike_c} °C (${data.current.feelslike_f} °F)</p>
+                    <p><strong>Humidity:</strong> ${data.current.humidity}%</p>
+                    <p><strong>Wind:</strong> ${data.current.wind_mph} mph (${data.current.wind_kph} kph) from the ${data.current.wind_dir}</p>
+                    <p><strong>Pressure:</strong> ${data.current.pressure_mb} mb (${data.current.pressure_in} in)</p>
+                    <p><strong>Visibility:</strong> ${data.current.vis_km} km (${data.current.vis_miles} miles)</p>
+                    <p><strong>Cloud Cover:</strong> ${data.current.cloud}%</p>
+                    <p><strong>Last Updated:</strong> ${data.current.last_updated}</p>
+                `;
+
+                document.getElementById("weather").innerHTML = weatherInfo;            })
+    }
+    
+    document.addEventListener("DOMContentLoaded", (ev) => {
+        getWeather();
+    });
+</script>
+
+<body>
+    <div class="container">
+        <h1>Weather Web!</h1>
+        <h1 id="area">Loading Area</h1>
+        <h2 id="region">Loading Region</h2>
+        <h3 id="weather">Loading Weather</h3>
+    </div>
+</body>
+</html>
